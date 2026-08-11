@@ -1,0 +1,35 @@
+[
+    {
+        "model_version": "v6",
+        "input_data": {
+            "age": 29,
+            "income": 42000
+        },
+        "input_hash": "f5c781eba7a2b937a86b49d49029333aefa494b75487c494a0d1406c25047bd8",
+        "prediction": 1,
+        "output_hash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "timestamp": "2026-02-17T00:14:08.201153"
+    },
+    {
+        "model_version": "v6",
+        "input_data": {
+            "age": 29,
+            "income": 42000
+        },
+        "input_hash": "f5c781eba7a2b937a86b49d49029333aefa494b75487c494a0d1406c25047bd8",
+        "prediction": 1,
+        "output_hash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "timestamp": "2026-03-02T21:34:04.816089"
+    },
+    {
+        "model_version": "v7",
+        "input_data": {
+            "age": 56.0,
+            "income": 987.0
+        },
+        "input_hash": "30e23e4ce0066d068c883b5fcdf8d4ff7a367fb4b850f8dd374c35e711372873",
+        "prediction": 0,
+        "output_hash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+        "timestamp": "2026-03-03T22:01:43.529399"
+    }
+]

@@ -1,0 +1,9 @@
+{
+    "model_id": "LR_MODEL_001",
+    "version_id": "v1",
+    "dataset_hash": "51323c5bb87841386c97bc473e08a0377cdce0d5028db143ab0a2e2e3163cace",
+    "training_time": "2026-02-14T22:40:12.858187",
+    "model_path": "C:\\Users\\Ms. Aditi\\OneDrive\\Desktop\\Blockchain\\ai-model-lineage-tracker\\ai_model\\model_versions\\v1\\model.pkl",
+    "previous_version": null,
+    "description": "Initial model training"
+}

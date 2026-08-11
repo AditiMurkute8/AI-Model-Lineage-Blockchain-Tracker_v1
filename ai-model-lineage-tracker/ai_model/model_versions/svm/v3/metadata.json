@@ -1,0 +1,15 @@
+{
+    "model_id": "svm",
+    "version_id": "v3",
+    "model_type": "Support Vector Machine",
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "training_time": "2026-04-06T10:38:13.461918",
+    "previous_version": "v2",
+    "dataset_name": "dataset_v2.csv",
+    "dataset_hash": "763cce8732c0f047bd5ca129ad9875a86c74769d0a99b1d2db87a78dd6b52117",
+    "experiment_note": "n/a",
+    "code_change_summary": "n/a",
+    "code_snippet": "n/a"
+}

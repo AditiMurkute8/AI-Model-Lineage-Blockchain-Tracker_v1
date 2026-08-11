@@ -1,0 +1,21 @@
+{
+    "model_id": "LR_MODEL_001",
+    "selected_model": "logistic-regression",
+    "version_id": "v53",
+    "dataset_hash": "763cce8732c0f047bd5ca129ad9875a86c74769d0a99b1d2db87a78dd6b52117",
+    "dataset_name": "dataset_v2.csv",
+    "training_time": "2026-03-28T12:31:08.813405",
+    "model_type": "Logistic Regression",
+    "features_used": 2,
+    "training_samples": 6,
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "previous_version": "v52",
+    "lineage_depth": 53,
+    "experiment_note": "No notes",
+    "code_change_summary": "No changes",
+    "code_snippet": "N/A",
+    "model_path": "C:\\Users\\Ms. Aditi\\OneDrive\\Desktop\\Blockchain\\ai-model-lineage-tracker\\ai_model\\model_versions\\logistic-regression\\v53\\model.pkl",
+    "description": "Logistic Regression retrained with updated dataset"
+}

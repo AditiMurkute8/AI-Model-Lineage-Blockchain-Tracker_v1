@@ -1,0 +1,15 @@
+{
+    "model_id": "decision-tree",
+    "version_id": "v3",
+    "model_type": "Decision Tree",
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "training_time": "2026-04-05T13:12:26.174900",
+    "previous_version": "v2",
+    "dataset_name": "dataset_v2.csv",
+    "dataset_hash": "763cce8732c0f047bd5ca129ad9875a86c74769d0a99b1d2db87a78dd6b52117",
+    "experiment_note": "N/A",
+    "code_change_summary": "N/A",
+    "code_snippet": "N/A"
+}
