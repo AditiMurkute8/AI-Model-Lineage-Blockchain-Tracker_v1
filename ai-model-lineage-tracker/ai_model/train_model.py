@@ -40,30 +40,53 @@ def generate_dataset_hash(file_path):
     return sha256.hexdigest()
 
 
-# ================= SELECT MODEL =================
-def get_model(model_id):
+# ================= STANDALONE ALGORITHM TRAINERS =================
+def fit_logistic_regression(X, y):
+    model = LogisticRegression(max_iter=1000)
+    model.fit(X, y)
+    return model, "Logistic Regression"
+
+
+def fit_decision_tree(X, y):
+    model = DecisionTreeClassifier(random_state=42)
+    model.fit(X, y)
+    return model, "Decision Tree"
+
+
+def fit_random_forest(X, y):
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X, y)
+    return model, "Random Forest"
+
+
+def fit_svm(X, y):
+    model = SVC(probability=True)
+    model.fit(X, y)
+    return model, "Support Vector Machine"
+
+
+# ================= DISPATCHER =================
+def fit_model(model_id, X, y):
     if model_id == "logistic-regression":
-        return LogisticRegression(max_iter=1000), "Logistic Regression"
+        return fit_logistic_regression(X, y)
 
     elif model_id == "decision-tree":
-        return DecisionTreeClassifier(random_state=42), "Decision Tree"
+        return fit_decision_tree(X, y)
 
     elif model_id == "random-forest":
-        return RandomForestClassifier(n_estimators=100, random_state=42), "Random Forest"
+        return fit_random_forest(X, y)
 
     elif model_id == "svm":
-        return SVC(probability=True), "Support Vector Machine"
+        return fit_svm(X, y)
 
     else:
-        return LogisticRegression(max_iter=1000), "Logistic Regression"
+        return fit_logistic_regression(X, y)
 
 
 # ================= MAIN TRAIN FUNCTION =================
 def train_new_version():
     data_input = load_input()
     model_id = data_input.get("model_id", "logistic-regression")
-
-    model, model_name = get_model(model_id)
 
     # ================= LOAD DATA =================
     data = pd.read_csv(DATASET_PATH)
@@ -74,7 +97,7 @@ def train_new_version():
     dataset_hash = generate_dataset_hash(DATASET_PATH)
 
     # ================= TRAIN MODEL =================
-    model.fit(X, y)
+    model, model_name = fit_model(model_id, X, y)
     y_pred = model.predict(X)
 
     accuracy = accuracy_score(y, y_pred)

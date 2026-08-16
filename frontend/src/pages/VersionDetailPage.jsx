@@ -239,7 +239,7 @@ function VersionDetailPage() {
           <p className="stat-label">
             {isAI ? "Snapshot Time" : "Training Time"}
           </p>
-          <h2 className="stat-value">{formatDate(version.training_time)}</h2>
+          <h2 className="stat-value">{formatDate(version.training_time || version.training_timestamp || version.created_at)}</h2>
         </div>
       </div>
 

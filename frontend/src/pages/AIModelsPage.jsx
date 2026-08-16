@@ -28,7 +28,13 @@ function AIModelsPage() {
           summary: "Boundary-based learning for high-separation intelligent classification.",
           chips: ["Margin Analysis", "Boundary Confidence", "Class Separation", "Prediction Strength"],
         };
+      case "git-commit-intelligence":
+        return {
+          summary: "Git Commit classification engine trained on engineered code-change diff features.",
+          chips: ["Commit Classifier", "41 Diff Features", "SVM RBF Kernel", "Blockchain Provenance"],
+        };
       default:
+
         return {
           summary: "Smart insights, predictive monitoring, and model intelligence.",
           chips: ["AI Insights", "Trust Score", "Drift Detection", "Predictions"],
