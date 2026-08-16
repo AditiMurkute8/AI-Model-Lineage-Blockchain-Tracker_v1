@@ -38,7 +38,18 @@ export const MODEL_META = {
     description:
       "A powerful classifier that separates classes using an optimal decision boundary.",
   },
+
+  "git-commit-intelligence": {
+    id: "git-commit-intelligence",
+    name: "Git Commit Intelligence",
+    shortName: "GCI",
+    badge: "Git Intelligence & Lineage",
+    category: "Code Intelligence Classifier (SVM RBF)",
+    description:
+      "AI-powered Git commit type classification with cryptographic blockchain model lineage tracking.",
+  },
 };
+
 
 export function getModelMeta(modelId) {
   return (

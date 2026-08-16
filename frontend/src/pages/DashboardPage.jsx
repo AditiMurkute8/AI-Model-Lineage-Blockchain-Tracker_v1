@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { getVersions } from "../services/api";
 import PageHeader from "../components/PageHeader";
 import { getModelMeta } from "../utils/modelMeta";
+import GitCommitPredictCard from "../components/GitCommitPredictCard";
 
 function DashboardPage() {
   const [versions, setVersions] = useState([]);
@@ -235,8 +236,12 @@ function DashboardPage() {
             </div>
           )}
 
+          {/* ================= GIT COMMIT INTELLIGENCE PREDICT CARD ================= */}
+          {modelId === "git-commit-intelligence" && <GitCommitPredictCard />}
+
           {/* HEADER */}
           <div className="section-header">
+
             <h2 className="section-title">
               {isAI ? "Recent Intelligence States" : "Recent Versions"}
             </h2>
