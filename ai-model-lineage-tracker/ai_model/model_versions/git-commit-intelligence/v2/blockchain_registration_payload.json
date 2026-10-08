@@ -1,8 +1,10 @@
 {
   "model_id": "git-commit-intelligence",
   "version_id": "v2",
-  "dataset_hash": "4a79f53736240b2c669ad33f8c5c37f2ff560584b2fc7f3d227322248b2bfd0d",
-  "contract_function": "registerModelVersion",
-  "status": "BLOCKCHAIN REGISTRATION PENDING",
-  "created_at": "2026-08-14T00:12:29.171121"
+  "dataset_hash": "5fdcc497843ade2c161fce80d06a777924348525d4beefad1014a68f9bebea20",
+  "model_hash": "a7068781c80a73d6df14058bfef7e2f11c766d8ad758c30f147ef7eb45776d42",
+  "metadata_hash": "030ccdd7a5075b495f9b8ccd6d5246bfced14eaabd3d3d93e2c898e5d2aa69e4",
+  "contract_address": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+  "contract_function": "registerModelProvenance",
+  "status": "REGISTERED"
 }

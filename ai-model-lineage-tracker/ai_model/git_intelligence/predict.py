@@ -40,8 +40,12 @@ def load_model_artifacts(model_id: str = "git-commit-intelligence", version_id: 
     if not os.path.exists(metadata_path):
         raise FileNotFoundError(f"Metadata file not found at '{metadata_path}'")
 
-    with open(model_path, "rb") as f:
-        model = pickle.load(f)
+    import joblib
+    try:
+        model = joblib.load(model_path)
+    except Exception:
+        with open(model_path, "rb") as f:
+            model = pickle.load(f)
     with open(scaler_path, "rb") as f:
         scaler = pickle.load(f)
     with open(metadata_path, "r", encoding="utf-8") as f:
@@ -56,7 +60,7 @@ def predict_git_commit(commit_input: Dict[str, Any], model_id: str = "git-commit
     """
     req_version = version_id or commit_input.get("version_id") or "v1"
     model, scaler, metadata = load_model_artifacts(model_id, req_version)
-    feature_keys = metadata.get("feature_keys", [])
+    feature_keys = metadata.get("feature_keys", metadata.get("feature_names", metadata.get("features", [])))
 
     if not feature_keys:
         raise ValueError("Feature ordering keys missing in metadata.json!")
@@ -73,8 +77,8 @@ def predict_git_commit(commit_input: Dict[str, Any], model_id: str = "git-commit
     }
 
     extracted_features = extract_commit_features(record)
-    feature_vector = np.array([[extracted_features[k] for k in feature_keys]])
-    scaled_vector = scaler.transform(feature_vector)
+    feature_vector = np.array([[extracted_features.get(k, 0) for k in feature_keys]])
+    scaled_vector = scaler.transform(feature_vector) if scaler is not None else feature_vector
 
     pred_label = model.predict(scaled_vector)[0]
 

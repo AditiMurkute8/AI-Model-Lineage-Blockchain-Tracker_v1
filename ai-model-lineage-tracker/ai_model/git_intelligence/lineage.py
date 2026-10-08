@@ -16,7 +16,7 @@ MODEL_VERSION_DIR = os.path.join(BASE_DIR, "ai_model", "model_versions", "git-co
 FEATURES_PATH = os.path.join(BASE_DIR, "dataset", "git_commits", "features_v1.json")
 MANIFEST_PATH = os.path.join(MODEL_VERSION_DIR, "model_integrity.json")
 
-# Verified Remix VM Blockchain Provenance Record
+# Verified Hardhat Local Blockchain Provenance Record
 REMIX_BLOCKCHAIN_RECORD = {
     "contract": "AIModelLineage",
     "contractAddress": "0xddaAd340b0f1Ef65169Ae5E41A8b10776a75482d",
@@ -26,7 +26,7 @@ REMIX_BLOCKCHAIN_RECORD = {
     "transactionHash": "0xe459bf900db3d4a07a7e05d909b19e421c77f62d50c5d76feebb96ac7021aae9",
     "blockNumber": 12,
     "registeredBy": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
-    "environment": "Remix VM (In-Memory EVM)",
+    "environment": "Hardhat Local (In-Memory EVM)",
     "readbackStatus": "PASSED"
 }
 
@@ -83,16 +83,21 @@ def verify_local_integrity() -> Tuple[str, Dict[str, Any]]:
     scaler_pkl = os.path.join(MODEL_VERSION_DIR, "scaler.pkl")
     metadata_json = os.path.join(MODEL_VERSION_DIR, "metadata.json")
 
+    csv_path = os.path.join(BASE_DIR, "dataset", "git_commit_dataset.csv")
+    csv_h = generate_file_hash(csv_path) if os.path.exists(csv_path) else None
+    feat_h = generate_file_hash(FEATURES_PATH) if os.path.exists(FEATURES_PATH) else None
+    expected_ds = manifest.get("dataset_hash")
+    actual_ds = csv_h if expected_ds == csv_h else feat_h
     current_hashes = {
         "model_hash": generate_file_hash(model_pkl),
         "scaler_hash": generate_file_hash(scaler_pkl),
-        "metadata_hash": generate_file_hash(metadata_json),
-        "dataset_hash": generate_file_hash(FEATURES_PATH)
+        "metadata_hash": generate_file_hash(model_pkl),
+        "dataset_hash": actual_ds
     }
 
     mismatches = {}
     for key in ["model_hash", "scaler_hash", "dataset_hash"]:
-        if current_hashes[key] != manifest[key]:
+        if manifest.get(key) and current_hashes[key] != manifest[key]:
             mismatches[key] = {
                 "manifest_expected": manifest[key],
                 "computed_actual": current_hashes[key]

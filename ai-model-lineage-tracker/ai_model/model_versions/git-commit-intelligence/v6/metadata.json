@@ -1,0 +1,373 @@
+{
+  "model_id": "git-commit-intelligence",
+  "version_id": "v6",
+  "algorithm": "Support Vector Machine (RBF Kernel)",
+  "task": "commit_type_classification",
+  "target": "commit_type",
+  "num_features": 41,
+  "num_training_samples": 1202,
+  "num_validation_samples": 257,
+  "num_test_samples": 259,
+  "classes": [
+    "Bug Fix",
+    "Configuration/Chore",
+    "Documentation",
+    "Feature",
+    "General/Other",
+    "Refactoring",
+    "Testing"
+  ],
+  "feature_keys": [
+    "added_comments_count",
+    "added_functions_count",
+    "added_imports_count",
+    "added_test_assertions_count",
+    "avg_path_depth",
+    "day_of_week",
+    "deleted_comments_count",
+    "deleted_functions_count",
+    "deleted_imports_count",
+    "diff_hunks_count",
+    "diff_length_chars",
+    "diff_num_lines",
+    "has_config_file",
+    "has_js_file",
+    "has_json_file",
+    "has_md_file",
+    "has_test_file",
+    "has_ts_file",
+    "has_yml_file",
+    "hour_of_day",
+    "is_weekend",
+    "lines_added",
+    "lines_added_ratio",
+    "lines_deleted",
+    "lines_deleted_ratio",
+    "log1p_files_modified",
+    "log1p_lines_added",
+    "log1p_lines_deleted",
+    "log1p_total_lines",
+    "max_path_depth",
+    "net_line_change",
+    "num_directories_touched",
+    "num_distinct_file_types",
+    "num_files_modified",
+    "total_lines_changed",
+    "touches_config",
+    "touches_docs",
+    "touches_lib",
+    "touches_package_files",
+    "touches_src",
+    "touches_test"
+  ],
+  "training_time": "2026-08-18T21:50:41.205940",
+  "training_timestamp": "2026-08-18T21:50:41.205940",
+  "created_at": "2026-08-18T21:50:41.205940",
+  "previous_version": "v5",
+  "dataset_name": "features_v1.json",
+  "dataset_hash": "4a79f53736240b2c669ad33f8c5c37f2ff560584b2fc7f3d227322248b2bfd0d",
+  "feature_schema_version": "v1",
+  "experiment_note": "No notes",
+  "code_change_summary": "No changes",
+  "code_snippet": "N/A",
+  "evaluation_metrics": {
+    "validation": {
+      "accuracy": 0.4981,
+      "macro_precision": 0.3974,
+      "macro_recall": 0.5197,
+      "macro_f1": 0.4068,
+      "weighted_precision": 0.6153,
+      "weighted_recall": 0.4981,
+      "weighted_f1": 0.5182,
+      "train_accuracy": 0.4676,
+      "train_macro_f1": 0.4482,
+      "confusion_matrix": [
+        [
+          42,
+          12,
+          1,
+          19,
+          7,
+          20,
+          1
+        ],
+        [
+          7,
+          34,
+          25,
+          2,
+          6,
+          2,
+          1
+        ],
+        [
+          2,
+          0,
+          34,
+          0,
+          1,
+          1,
+          1
+        ],
+        [
+          4,
+          3,
+          2,
+          10,
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          1,
+          3,
+          1
+        ],
+        [
+          1,
+          1,
+          0,
+          0,
+          0,
+          5,
+          1
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2
+        ]
+      ],
+      "classification_report": {
+        "Bug Fix": {
+          "precision": 0.7368421052631579,
+          "recall": 0.4117647058823529,
+          "f1-score": 0.5283018867924528,
+          "support": 102.0
+        },
+        "Configuration/Chore": {
+          "precision": 0.68,
+          "recall": 0.44155844155844154,
+          "f1-score": 0.5354330708661418,
+          "support": 77.0
+        },
+        "Documentation": {
+          "precision": 0.5396825396825397,
+          "recall": 0.8717948717948718,
+          "f1-score": 0.6666666666666666,
+          "support": 39.0
+        },
+        "Feature": {
+          "precision": 0.3225806451612903,
+          "recall": 0.45454545454545453,
+          "f1-score": 0.37735849056603776,
+          "support": 22.0
+        },
+        "General/Other": {
+          "precision": 0.05555555555555555,
+          "recall": 0.16666666666666666,
+          "f1-score": 0.08333333333333333,
+          "support": 6.0
+        },
+        "Refactoring": {
+          "precision": 0.16129032258064516,
+          "recall": 0.625,
+          "f1-score": 0.2564102564102564,
+          "support": 8.0
+        },
+        "Testing": {
+          "precision": 0.2857142857142857,
+          "recall": 0.6666666666666666,
+          "f1-score": 0.4,
+          "support": 3.0
+        },
+        "accuracy": 0.4980544747081712,
+        "macro avg": {
+          "precision": 0.397380779136782,
+          "recall": 0.5197138295877791,
+          "f1-score": 0.40678624351926984,
+          "support": 257.0
+        },
+        "weighted avg": {
+          "precision": 0.6153427499966182,
+          "recall": 0.4980544747081712,
+          "f1-score": 0.5181646216080076,
+          "support": 257.0
+        }
+      }
+    },
+    "test": {
+      "accuracy": 0.39,
+      "macro_precision": 0.4151,
+      "macro_recall": 0.456,
+      "macro_f1": 0.3676,
+      "weighted_precision": 0.6769,
+      "weighted_recall": 0.39,
+      "weighted_f1": 0.414,
+      "train_accuracy": 0.4676,
+      "train_macro_f1": 0.4482,
+      "confusion_matrix": [
+        [
+          23,
+          12,
+          2,
+          75,
+          6,
+          7,
+          1
+        ],
+        [
+          2,
+          25,
+          9,
+          3,
+          4,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          34,
+          4,
+          6,
+          2,
+          0
+        ],
+        [
+          1,
+          3,
+          1,
+          12,
+          2,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          1,
+          3,
+          0,
+          2,
+          5,
+          2,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          5
+        ]
+      ],
+      "classification_report": {
+        "Bug Fix": {
+          "precision": 0.8518518518518519,
+          "recall": 0.18253968253968253,
+          "f1-score": 0.3006535947712418,
+          "support": 126.0
+        },
+        "Configuration/Chore": {
+          "precision": 0.5681818181818182,
+          "recall": 0.5434782608695652,
+          "f1-score": 0.5555555555555556,
+          "support": 46.0
+        },
+        "Documentation": {
+          "precision": 0.7391304347826086,
+          "recall": 0.723404255319149,
+          "f1-score": 0.7311827956989247,
+          "support": 47.0
+        },
+        "Feature": {
+          "precision": 0.125,
+          "recall": 0.6,
+          "f1-score": 0.20689655172413793,
+          "support": 20.0
+        },
+        "General/Other": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "Refactoring": {
+          "precision": 0.16666666666666666,
+          "recall": 0.14285714285714285,
+          "f1-score": 0.15384615384615385,
+          "support": 14.0
+        },
+        "Testing": {
+          "precision": 0.45454545454545453,
+          "recall": 1.0,
+          "f1-score": 0.625,
+          "support": 5.0
+        },
+        "accuracy": 0.38996138996138996,
+        "macro avg": {
+          "precision": 0.4150537465754857,
+          "recall": 0.45603990594079136,
+          "f1-score": 0.3675906645137163,
+          "support": 259.0
+        },
+        "weighted avg": {
+          "precision": 0.6768914595001552,
+          "recall": 0.38996138996138996,
+          "f1-score": 0.4139779037950209,
+          "support": 259.0
+        }
+      }
+    }
+  },
+  "candidate_leaderboard": {
+    "Baseline (Majority)": {
+      "val_accuracy": 0.3969,
+      "val_macro_f1": 0.0812,
+      "test_accuracy": 0.4865,
+      "test_macro_f1": 0.0935
+    },
+    "Logistic Regression": {
+      "val_accuracy": 0.4591,
+      "val_macro_f1": 0.3699,
+      "test_accuracy": 0.3938,
+      "test_macro_f1": 0.3374
+    },
+    "Decision Tree": {
+      "val_accuracy": 0.3385,
+      "val_macro_f1": 0.2764,
+      "test_accuracy": 0.2934,
+      "test_macro_f1": 0.2544
+    },
+    "Random Forest": {
+      "val_accuracy": 0.463,
+      "val_macro_f1": 0.3228,
+      "test_accuracy": 0.4826,
+      "test_macro_f1": 0.384
+    },
+    "SVM": {
+      "val_accuracy": 0.4981,
+      "val_macro_f1": 0.4068,
+      "test_accuracy": 0.39,
+      "test_macro_f1": 0.3676
+    }
+  }
+}

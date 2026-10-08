@@ -1,0 +1,17 @@
+{
+  "git-commit-intelligence:v2": {
+    "model_id": "git-commit-intelligence",
+    "version_id": "v2",
+    "dataset_hash": "5fdcc497843ade2c161fce80d06a777924348525d4beefad1014a68f9bebea20",
+    "model_hash": "a7068781c80a73d6df14058bfef7e2f11c766d8ad758c30f147ef7eb45776d42",
+    "metadata_hash": "030ccdd7a5075b495f9b8ccd6d5246bfced14eaabd3d3d93e2c898e5d2aa69e4",
+    "status": "REGISTERED",
+    "transaction_hash": "5de35e0554f82543b674a890ef819aa8072eadaf4ae567a206cb168fc4784090",
+    "block_number": 2,
+    "contract_address": "0xF2E246BB76DF876Cef8b38ae84130F4F55De395b",
+    "network": "EVM (Chain ID: 131277322940537)",
+    "registered_by": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
+    "on_chain_timestamp": 1790528281,
+    "registered_at": "2026-09-27T22:27:59.334796"
+  }
+}
