@@ -11,7 +11,7 @@ app.use(express.json());
 // ================= PATH CONFIG =================
 const BASE_DIR = __dirname;
 const MODEL_DIR = path.join(BASE_DIR, "ai_model", "model_versions");
-const PYTHON_PATH = process.env.PYTHON_PATH || "py";
+const PYTHON_PATH = process.env.PYTHON_PATH || (process.platform === "win32" ? "py" : "python3");
 
 // ================= HELPER =================
 const getModelPath = (modelId) => {
@@ -381,6 +381,8 @@ app.get("/", (req, res) => {
 });
 
 // ================= SERVER =================
-app.listen(5000, () => {
-  console.log("Server running on http://localhost:5000");
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
