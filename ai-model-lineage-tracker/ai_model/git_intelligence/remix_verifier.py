@@ -25,7 +25,8 @@ def verify_payload_and_local_integrity(model_id: str = "git-commit-intelligence"
     with open(payload_path, "r", encoding="utf-8") as f:
         payload = json.load(f)
 
-    computed_dataset_hash = generate_file_hash(FEATURES_PATH)
+    dataset_file = os.path.join(BASE_DIR, "dataset", "git_commit_dataset_v2.csv") if version_id == "v2" else FEATURES_PATH
+    computed_dataset_hash = generate_file_hash(dataset_file)
 
     hash_matches = (computed_dataset_hash == payload["dataset_hash"])
     if not hash_matches:

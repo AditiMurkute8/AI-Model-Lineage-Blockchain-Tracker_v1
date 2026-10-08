@@ -1,0 +1,242 @@
+{
+  "contract_address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  "deployment_tx_hash": "0208ae34f995f3451db846ab29bdfea24bb31dd6ca4d00dd6ab93938fd29b5b3",
+  "block_number": 1,
+  "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "chain_id": 31337,
+  "network": "Hardhat Local",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "inferenceId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getInferenceRecord",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "modelId",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "versionId",
+          "type": "string"
+        }
+      ],
+      "name": "getModelProvenance",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "modelId",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "versionId",
+          "type": "string"
+        }
+      ],
+      "name": "getModelVersion",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "inferenceCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "modelVersion",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "inputHash",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "outputHash",
+          "type": "string"
+        }
+      ],
+      "name": "registerInference",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "modelId",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "versionId",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "datasetHash",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "modelHash",
+          "type": "string"
+        }
+      ],
+      "name": "registerModelProvenance",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "modelId",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "versionId",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "datasetHash",
+          "type": "string"
+        }
+      ],
+      "name": "registerModelVersion",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]
+}

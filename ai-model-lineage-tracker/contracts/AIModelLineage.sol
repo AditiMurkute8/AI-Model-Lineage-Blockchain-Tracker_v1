@@ -18,6 +18,7 @@ contract AIModelLineage {
         string modelId;
         string versionId;
         string datasetHash;
+        string modelHash;
         uint256 timestamp;
         address registeredBy;
     }
@@ -34,12 +35,12 @@ contract AIModelLineage {
 
     uint256 public inferenceCount = 0;
 
-    function registerModelVersion(
+    function registerModelProvenance(
         string memory modelId,
         string memory versionId,
-        string memory datasetHash
-    ) public onlyOwner {
-
+        string memory datasetHash,
+        string memory modelHash
+    ) public {
         string memory modelKey = string(
             abi.encodePacked(modelId, "_", versionId)
         );
@@ -48,9 +49,49 @@ contract AIModelLineage {
             modelId,
             versionId,
             datasetHash,
+            modelHash,
             block.timestamp,
             msg.sender
         );
+    }
+
+    function getModelProvenance(
+        string memory modelId,
+        string memory versionId
+    )
+        public
+        view
+        returns (
+            string memory,
+            string memory,
+            string memory,
+            string memory,
+            uint256,
+            address
+        )
+    {
+        string memory modelKey = string(
+            abi.encodePacked(modelId, "_", versionId)
+        );
+
+        ModelVersion memory mv = modelVersions[modelKey];
+
+        return (
+            mv.modelId,
+            mv.versionId,
+            mv.datasetHash,
+            mv.modelHash,
+            mv.timestamp,
+            mv.registeredBy
+        );
+    }
+
+    function registerModelVersion(
+        string memory modelId,
+        string memory versionId,
+        string memory datasetHash
+    ) public {
+        registerModelProvenance(modelId, versionId, datasetHash, "");
     }
 
     function getModelVersion(
@@ -86,8 +127,7 @@ contract AIModelLineage {
         string memory modelVersion,
         string memory inputHash,
         string memory outputHash
-    ) public onlyOwner {
-
+    ) public {
         inferenceRecords[inferenceCount] = InferenceRecord(
             modelVersion,
             inputHash,

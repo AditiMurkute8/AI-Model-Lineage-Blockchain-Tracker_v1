@@ -1,9 +1,11 @@
 {
+  "git-commit-intelligence:v2": {
     "model_id": "git-commit-intelligence",
     "version_id": "v2",
-    "model_hash": "a7068781c80a73d6df14058bfef7e2f11c766d8ad758c30f147ef7eb45776d42",
     "dataset_hash": "5fdcc497843ade2c161fce80d06a777924348525d4beefad1014a68f9bebea20",
+    "model_hash": "a7068781c80a73d6df14058bfef7e2f11c766d8ad758c30f147ef7eb45776d42",
     "metadata_hash": "030ccdd7a5075b495f9b8ccd6d5246bfced14eaabd3d3d93e2c898e5d2aa69e4",
-    "timestamp": "2026-09-27T21:50:39.659836",
-    "scaler_hash": "9c298d589a2158eb513cb52191144518a2acab2cb0c04f1df14fca0f712fa4a1"
+    "status": "REGISTERED",
+    "registered_at": "2026-09-27T16:33:36.032Z"
+  }
 }

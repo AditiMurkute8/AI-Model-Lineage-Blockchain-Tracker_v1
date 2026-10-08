@@ -1,0 +1,11 @@
+{
+  "model_id": "git-commit-intelligence",
+  "version_id": "v7",
+  "algorithm": "Support Vector Machine (RBF Kernel)",
+  "model_hash": "a6b61c8d13bcd9ad0f2f117f64bd791769e2adf7a123201d51954ba946560d71",
+  "scaler_hash": "a34c8f743a2edb9d84d7d1172b6c2b2d82cd5c282d8241981c2f852cf3dc077c",
+  "metadata_hash": "1d37ae088184a57a8c937f62c24c282c43cb7ea91f27da0874fc69ce5a19700a",
+  "dataset_hash": "4a79f53736240b2c669ad33f8c5c37f2ff560584b2fc7f3d227322248b2bfd0d",
+  "hash_algorithm": "SHA-256",
+  "generated_at": "2026-08-20T14:04:29.621362"
+}

@@ -150,3 +150,8 @@ ai-model-lineage-tracker/dataset/git_commits/raw_commits.json
 ai-model-lineage-tracker/dataset/git_commits/raw_commits_axios.json
 ai-model-lineage-tracker/dataset/git_commits/processed_commits.json
 ai-model-lineage-tracker/dataset/git_commits/processed_commits_v2.json
+# Hardhat build artifacts
+artifacts/
+cache/
+**/artifacts/
+**/cache/

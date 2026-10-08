@@ -1,403 +1,450 @@
-import { useState, useEffect } from "react";
-import { predictGitCommit, getGitCommitLineage, retrainGitCommitModel, getVersionById } from "../services/api";
+import React, { useState, useEffect } from "react";
+import {
+  analyzeCommit,
+  predictGitCommit,
+  getProvenanceRecord,
+  registerProvenanceLocal,
+  verifyProvenanceLocal,
+  getBlockchainProvenance,
+  registerBlockchainProvenance,
+  verifyBlockchainProvenance
+} from "../services/api";
 
 function GitCommitPredictCard() {
-  const [message, setMessage] = useState("fix: resolve authentication token validation crash");
-  const [filesChanged, setFilesChanged] = useState("src/auth/login.py, tests/test_login.py");
-  const [linesAdded, setLinesAdded] = useState(25);
-  const [linesDeleted, setLinesDeleted] = useState(8);
-  const [numFiles, setNumFiles] = useState(2);
-  const [diff, setDiff] = useState("--- src/auth/login.py\n+++ src/auth/login.py\n+if not validate_token(token):\n+    raise ValueError('Invalid token')");
-
-  // Training metadata inputs
-  const [noteSummary, setNoteSummary] = useState("Optimized SVM RBF kernel with diff feature extraction");
-  const [codeChanges, setCodeChanges] = useState("Enhanced feature vector normalization and added comment/function ratio parsing");
-  const [experimentalNotes, setExperimentalNotes] = useState("Validation macro-F1 improved with balanced class weights");
-  const [showTrainConfig, setShowTrainConfig] = useState(false);
-
+  const [commitUrl, setCommitUrl] = useState("https://github.com/expressjs/express/commit/6340c1eaaedc0ddcae8be8df2cdb1d2e961cbf2f");
+  const [selectedVersion, setSelectedVersion] = useState("v2");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [analysisResult, setAnalysisResult] = useState(null);
+
+  // Form inputs for manual feature prediction
+  const [message, setMessage] = useState("");
+  const [filesChanged, setFilesChanged] = useState("");
+  const [linesAdded, setLinesAdded] = useState(0);
+  const [linesDeleted, setLinesDeleted] = useState(0);
+  const [numFiles, setNumFiles] = useState(1);
+  const [diff, setDiff] = useState("");
   const [prediction, setPrediction] = useState(null);
-  const [error, setError] = useState("");
 
-  const [retrainLoading, setRetrainLoading] = useState(false);
-  const [retrainResult, setRetrainResult] = useState(null);
+  // Local Provenance State
+  const [provStatus, setProvStatus] = useState("NOT_REGISTERED");
+  const [provLoading, setProvLoading] = useState(false);
+  const [provMessage, setProvMessage] = useState("");
+  const [provError, setProvError] = useState(null);
+  const [provDetails, setProvDetails] = useState(null);
 
-  const [lineage, setLineage] = useState(null);
-  const [lineageLoading, setLineageLoading] = useState(false);
+  // Blockchain Provenance State
+  const [bcStatus, setBcStatus] = useState("NOT REGISTERED");
+  const [bcLoading, setBcLoading] = useState(false);
+  const [bcMessage, setBcMessage] = useState("");
+  const [bcError, setBcError] = useState(null);
+  const [bcDetails, setBcDetails] = useState(null);
 
-  useEffect(() => {
-    fetchLineage();
-  }, []);
-
-  const fetchLineage = async () => {
+  const fetchProvenanceStatus = async (version) => {
     try {
-      setLineageLoading(true);
-      const data = await getGitCommitLineage("v1");
-      setLineage(data);
-    } catch (err) {
-      console.error("Lineage load error:", err);
-    } finally {
-      setLineageLoading(false);
+      // Local check
+      const resLocal = await getProvenanceRecord("git-commit-intelligence", version);
+      if (resLocal && resLocal.registered) {
+        setProvStatus(resLocal.status === "LOCAL VERIFICATION PASSED" ? "VERIFIED" : "REGISTERED");
+        setProvDetails(resLocal.data);
+      } else {
+        setProvStatus("NOT_REGISTERED");
+        setProvDetails(null);
+      }
+    } catch (e) {
+      setProvStatus("NOT_REGISTERED");
+    }
+
+    try {
+      // Blockchain check
+      const resBc = await getBlockchainProvenance("git-commit-intelligence", version);
+      if (resBc && resBc.registered) {
+        setBcStatus(resBc.status || "REGISTERED");
+        setBcDetails(resBc.data);
+      } else {
+        setBcStatus("NOT REGISTERED");
+        setBcDetails(null);
+      }
+    } catch (e) {
+      setBcStatus("NOT REGISTERED");
     }
   };
 
-  const handlePredict = async (e) => {
+  useEffect(() => {
+    fetchProvenanceStatus(selectedVersion);
+  }, [selectedVersion]);
+
+  const handleUrlAnalyze = async (e) => {
     e.preventDefault();
+    if (!commitUrl.trim()) return;
+    setLoading(true);
+    setError(null);
+    setAnalysisResult(null);
+
     try {
-      setLoading(true);
-      setError("");
-      setPrediction(null);
-
-      const filesList = filesChanged
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-
-      const payload = {
-        message,
-        files_changed: filesList,
-        lines_added: parseInt(linesAdded, 10) || 0,
-        lines_deleted: parseInt(linesDeleted, 10) || 0,
-        num_files_modified: parseInt(numFiles, 10) || filesList.length,
-        diff
-      };
-
-      const res = await predictGitCommit(payload);
-      setPrediction(res);
+      const data = await analyzeCommit(commitUrl.trim(), "git-commit-intelligence", selectedVersion);
+      if (data.error) {
+        setError(data.error);
+      } else {
+        setAnalysisResult(data);
+      }
     } catch (err) {
-      console.error("Prediction error:", err);
-      setError(err?.response?.data?.error || "Commit type prediction failed.");
+      setError(err.response?.data?.error || "Failed to analyze commit URL.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRetrain = async () => {
+  const handleManualPredict = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setPrediction(null);
+
+    const parsedFiles = filesChanged.split(",").map(s => s.trim()).filter(Boolean);
+
     try {
-      setRetrainLoading(true);
-      setError("");
-      setRetrainResult(null);
-
-      const payload = {
-        noteSummary,
-        codeChanges,
-        experimentalNotes
-      };
-
-      const res = await retrainGitCommitModel(payload);
-
-      // Retrieve backend persisted metadata as source of truth
-      let fetchedMeta = null;
-      try {
-        if (res && res.versionId) {
-          fetchedMeta = await getVersionById("git-commit-intelligence", res.versionId);
-        }
-      } catch (fetchErr) {
-        console.error("Error fetching created version metadata:", fetchErr);
-      }
-
-      setRetrainResult({
-        ...res,
-        persistedMetadata: fetchedMeta
+      const data = await predictGitCommit({
+        message,
+        files_changed: parsedFiles.length > 0 ? parsedFiles : ["modified_file.py"],
+        lines_added: parseInt(linesAdded, 10) || 0,
+        lines_deleted: parseInt(linesDeleted, 10) || 0,
+        num_files_modified: parseInt(numFiles, 10) || 1,
+        diff,
+        version_id: selectedVersion
       });
-      fetchLineage();
+      setPrediction(data);
     } catch (err) {
-      console.error("Retraining error:", err);
-      setError(err?.response?.data?.error || "Model retraining failed.");
+      setError(err.response?.data?.error || "Prediction failed.");
     } finally {
-      setRetrainLoading(false);
+      setLoading(false);
     }
   };
 
-  const formatDate = (val) => {
-    if (!val) return "N/A";
+  const handleRegisterLocalProvenance = async () => {
+    setProvLoading(true);
+    setProvError(null);
+    setProvMessage("");
     try {
-      return new Date(val).toLocaleString();
-    } catch {
-      return val;
+      const res = await registerProvenanceLocal("git-commit-intelligence", selectedVersion);
+      if (res.error) {
+        setProvError(res.error);
+      } else {
+        setProvStatus("REGISTERED");
+        setProvMessage(res.message || "Local provenance registered successfully.");
+        setProvDetails(res.record);
+      }
+    } catch (err) {
+      setProvError(err.response?.data?.error || "Failed to register local provenance.");
+    } finally {
+      setProvLoading(false);
     }
   };
+
+  const handleVerifyLocalProvenance = async () => {
+    setProvLoading(true);
+    setProvError(null);
+    setProvMessage("");
+    try {
+      const res = await verifyProvenanceLocal("git-commit-intelligence", selectedVersion);
+      if (res.verified) {
+        setProvStatus("VERIFIED");
+        setProvMessage(res.message || "Local verification passed!");
+        setProvDetails(res.record);
+      } else {
+        setProvStatus("NOT_VERIFIED");
+        setProvError(res.message || "Local verification failed.");
+      }
+    } catch (err) {
+      setProvError(err.response?.data?.error || "Failed to verify local provenance.");
+    } finally {
+      setProvLoading(false);
+    }
+  };
+
+  const handleRegisterBlockchainProvenance = async () => {
+    setBcLoading(true);
+    setBcError(null);
+    setBcMessage("");
+    try {
+      const res = await registerBlockchainProvenance("git-commit-intelligence", selectedVersion);
+      if (res.error) {
+        setBcError(res.error);
+      } else {
+        setBcStatus("REGISTERED");
+        setBcMessage(res.message || "Blockchain provenance registered successfully.");
+        setBcDetails(res.record);
+      }
+    } catch (err) {
+      setBcError(err.response?.data?.error || "Failed to register on blockchain.");
+    } finally {
+      setBcLoading(false);
+    }
+  };
+
+  const handleVerifyBlockchainProvenance = async () => {
+    setBcLoading(true);
+    setBcError(null);
+    setBcMessage("");
+    try {
+      const res = await verifyBlockchainProvenance("git-commit-intelligence", selectedVersion);
+      if (res.verified) {
+        setBcStatus("VERIFIED");
+        setBcMessage(res.message || "On-chain verification passed!");
+        setBcDetails(res.data);
+      } else {
+        setBcStatus("HASH_MISMATCH");
+        setBcError(res.message || "Blockchain verification failed.");
+      }
+    } catch (err) {
+      setBcError(err.response?.data?.error || "Failed to verify on blockchain.");
+    } finally {
+      setBcLoading(false);
+    }
+  };
+
+  const datasetHashDisplay = selectedVersion === "v2" 
+    ? "5fdcc497843ade2c161fce80d06a777924348525d4beefad1014a68f9bebea20"
+    : "19d5c12aa14bc894b736f75d8d137d2423a7fbf7fe28b6f5ebaed6a3b266d485";
+
+  const modelHashDisplay = selectedVersion === "v2"
+    ? "a7068781c80a73d6df14058bfef7e2f11c766d8ad758c30f147ef7eb45776d42"
+    : "47208bbe6a62298106cbab33be7096d85203a7e17c08d7d9d17be2f482cde042";
 
   return (
-    <div className="page-card" style={{ marginTop: "24px" }}>
-      <div className="train-lab-header" style={{ marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div className="train-form-card" style={{ maxWidth: "100%", margin: "0 auto" }}>
+      {/* VERSION SELECTOR */}
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        backgroundColor: "rgba(30, 41, 59, 0.6)",
+        padding: "16px 20px",
+        borderRadius: "8px",
+        border: "1px solid var(--border-color, #334155)",
+        marginBottom: "24px"
+      }}>
         <div>
-          <h2 className="train-lab-title">⚡ Git Commit Intelligence Predictor & Version Lab</h2>
-          <p className="train-lab-subtitle">
-            Classify Git commit intention & change scope using engineered diff features evaluated by SVM.
+          <h3 style={{ margin: 0, fontSize: "1.1rem", color: "#f8fafc" }}>Git Commit Intelligence Version Lab</h3>
+          <p style={{ margin: "4px 0 0 0", fontSize: "0.85rem", color: "#94a3b8" }}>
+            Select active model architecture for commit risk evaluation & provenance tracking
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button
-            type="button"
-            onClick={() => setShowTrainConfig(!showTrainConfig)}
-            className="secondary-button"
-            style={{ padding: "10px 14px", fontWeight: "600", borderColor: "#64748b" }}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <label style={{ fontSize: "0.9rem", color: "#e2e8f0", fontWeight: "600" }}>Model Version:</label>
+          <select
+            className="select-control"
+            value={selectedVersion}
+            onChange={(e) => setSelectedVersion(e.target.value)}
+            style={{
+              padding: "8px 16px",
+              borderRadius: "6px",
+              fontWeight: "600",
+              backgroundColor: "#0f172a",
+              color: "#38bdf8",
+              borderColor: "#0284c7"
+            }}
           >
-            {showTrainConfig ? "Hide Config" : "⚙️ Config Metadata"}
-          </button>
-
-          <button
-            type="button"
-            onClick={handleRetrain}
-            disabled={retrainLoading}
-            className="secondary-button"
-            style={{ padding: "10px 18px", fontWeight: "700", borderColor: "#38bdf8", color: "#38bdf8" }}
-          >
-            {retrainLoading ? "Executing Candidate Evaluation..." : "🚀 Train New Version"}
-          </button>
+            <option value="v2">v2 — Active (22 Structural Features)</option>
+            <option value="v1">v1 — Legacy (15 Features)</option>
+          </select>
         </div>
       </div>
 
-      {/* TRAINING METADATA CONFIGURATION PANEL */}
-      {showTrainConfig && (
-        <div className="page-card" style={{ marginBottom: "20px", borderColor: "#38bdf8", background: "rgba(56, 189, 248, 0.04)" }}>
-          <h4 style={{ color: "#38bdf8", marginBottom: "12px", fontSize: "1rem" }}>📝 Version Training Metadata Configuration</h4>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "12px" }}>
-            <div>
-              <label className="info-label compare-label">Note Summary</label>
-              <input
-                type="text"
-                className="select-control"
-                style={{ width: "100%", padding: "8px 12px" }}
-                value={noteSummary}
-                onChange={(e) => setNoteSummary(e.target.value)}
-                placeholder="Experiment goal or summary..."
-              />
-            </div>
-            <div>
-              <label className="info-label compare-label">Code Changes Summary</label>
-              <input
-                type="text"
-                className="select-control"
-                style={{ width: "100%", padding: "8px 12px" }}
-                value={codeChanges}
-                onChange={(e) => setCodeChanges(e.target.value)}
-                placeholder="Key code or pipeline updates..."
-              />
-            </div>
-          </div>
-          <div>
-            <label className="info-label compare-label">Experimental Notes / Code Snippet</label>
-            <textarea
-              className="train-code-editor"
-              style={{ minHeight: "70px", fontFamily: "monospace", fontSize: "0.85rem", width: "100%" }}
-              value={experimentalNotes}
-              onChange={(e) => setExperimentalNotes(e.target.value)}
-              placeholder="Detailed experiment notes or logic snippet..."
-            />
-          </div>
-        </div>
-      )}
+      {/* TOP SECTION: GITHUB COMMIT URL ANALYZER */}
+      <div style={{
+        padding: "20px",
+        borderRadius: "8px",
+        backgroundColor: "rgba(15, 23, 42, 0.6)",
+        border: "1px solid var(--border-color, #334155)",
+        marginBottom: "24px"
+      }}>
+        <h4 style={{ margin: "0 0 12px 0", color: "#38bdf8", fontSize: "1rem" }}>
+          GitHub Commit URL Intelligence Analyzer
+        </h4>
 
-      {/* RETRAINING RESULT BANNER */}
-      {retrainResult && (
-        <div className="page-card" style={{ marginBottom: "24px", borderColor: "#10b981", background: "rgba(16, 185, 129, 0.08)" }}>
-          <h3 style={{ color: "#10b981", marginBottom: "12px" }}>🎉 Retraining Complete — Version Created!</h3>
-          <div className="info-grid" style={{ gridTemplateColumns: "1fr 1fr 1fr 1fr", marginBottom: "14px" }}>
-            <div className="info-box">
-              <p className="info-label">New Version</p>
-              <div className="info-value" style={{ fontWeight: "bold" }}>{retrainResult.versionId}</div>
-            </div>
-            <div className="info-box">
-              <p className="info-label">Previous Version</p>
-              <div className="info-value">{retrainResult.previousVersion || "None"}</div>
-            </div>
-            <div className="info-box">
-              <p className="info-label">Creation Date / Time</p>
-              <div className="info-value" style={{ fontSize: "0.85rem" }}>
-                {formatDate(retrainResult.persistedMetadata?.training_time || retrainResult.persistedMetadata?.training_timestamp || retrainResult.training_time)}
-              </div>
-            </div>
-            <div className="info-box">
-              <p className="info-label">Val Macro-F1</p>
-              <div className="info-value">{retrainResult.validationMacroF1}</div>
-            </div>
-          </div>
-
-          <div className="version-detail-stack" style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "12px" }}>
-            <div className="info-box">
-              <p className="info-label">Note Summary (Persisted in metadata.json)</p>
-              <div className="info-value">
-                {retrainResult.persistedMetadata?.experiment_note || retrainResult.experiment_note || "N/A"}
-              </div>
-            </div>
-            <div className="info-box">
-              <p className="info-label">Code Changes Summary (Persisted in metadata.json)</p>
-              <div className="info-value">
-                {retrainResult.persistedMetadata?.code_change_summary || retrainResult.code_change_summary || "N/A"}
-              </div>
-            </div>
-            <div className="info-box">
-              <p className="info-label">Experimental Notes / Code Snippet (Persisted in metadata.json)</p>
-              <div className="info-value" style={{ fontFamily: "monospace", fontSize: "0.85rem" }}>
-                {retrainResult.persistedMetadata?.code_snippet || retrainResult.code_snippet || "N/A"}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <form onSubmit={handlePredict}>
-        <div className="train-form-grid">
-          <div className="train-form-column">
-            <div className="train-field-card">
-              <label className="info-label compare-label">Commit Message</label>
-              <input
-                type="text"
-                className="select-control"
-                style={{ width: "100%", padding: "10px 14px" }}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="e.g., fix memory leak in HTTP stream adapter"
-                required
-              />
-            </div>
-
-            <div className="train-field-card">
-              <label className="info-label compare-label">Files Changed (Comma Separated)</label>
-              <input
-                type="text"
-                className="select-control"
-                style={{ width: "100%", padding: "10px 14px" }}
-                value={filesChanged}
-                onChange={(e) => setFilesChanged(e.target.value)}
-                placeholder="src/auth/login.py, tests/test_login.py"
-                required
-              />
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
-              <div>
-                <label className="info-label compare-label">Lines Added</label>
-                <input
-                  type="number"
-                  className="select-control"
-                  style={{ width: "100%", padding: "8px 12px" }}
-                  value={linesAdded}
-                  onChange={(e) => setLinesAdded(e.target.value)}
-                  min="0"
-                />
-              </div>
-
-              <div>
-                <label className="info-label compare-label">Lines Deleted</label>
-                <input
-                  type="number"
-                  className="select-control"
-                  style={{ width: "100%", padding: "8px 12px" }}
-                  value={linesDeleted}
-                  onChange={(e) => setLinesDeleted(e.target.value)}
-                  min="0"
-                />
-              </div>
-
-              <div>
-                <label className="info-label compare-label">Files Modified</label>
-                <input
-                  type="number"
-                  className="select-control"
-                  style={{ width: "100%", padding: "8px 12px" }}
-                  value={numFiles}
-                  onChange={(e) => setNumFiles(e.target.value)}
-                  min="1"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="train-code-card">
-            <label className="info-label compare-label">Git Patch / Code Diff (Optional)</label>
-            <textarea
-              className="train-code-editor"
-              style={{ minHeight: "160px", fontFamily: "monospace", fontSize: "0.85rem" }}
-              value={diff}
-              onChange={(e) => setDiff(e.target.value)}
-              placeholder="--- path/to/file.py\n+++ path/to/file.py\n+add patch diff lines here"
-            />
-          </div>
-        </div>
-
-        <div className="train-footer" style={{ marginTop: "20px" }}>
+        <form onSubmit={handleUrlAnalyze} style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          <input
+            type="url"
+            className="select-control"
+            style={{ flex: 1, padding: "10px 14px", fontSize: "0.9rem" }}
+            value={commitUrl}
+            onChange={(e) => setCommitUrl(e.target.value)}
+            placeholder="https://github.com/OWNER/REPO/commit/SHA"
+            required
+          />
           <button
             type="submit"
             disabled={loading}
-            className="primary-button train-submit-btn"
+            className="primary-button"
+            style={{ padding: "10px 20px", whiteSpace: "nowrap" }}
           >
-            {loading ? "Evaluating Features & Predicting..." : "Predict Commit Type"}
+            {loading ? "Analyzing..." : "Analyze GitHub Commit"}
           </button>
-        </div>
-      </form>
+        </form>
 
-      {error && <div className="error-box" style={{ marginTop: "16px" }}>{error}</div>}
+        {error && <div className="error-box" style={{ marginTop: "16px" }}>{error}</div>}
 
-      {/* PREDICTION DISPLAY CARD */}
-      {prediction && (
-        <div className="stats-grid" style={{ marginTop: "24px", gridTemplateColumns: "1fr 1fr 1fr 1fr" }}>
-          <div className="stat-card" style={{ borderColor: "#10b981", background: "rgba(16, 185, 129, 0.05)" }}>
-            <p className="stat-label">Predicted Commit Type</p>
-            <h2 className="stat-value" style={{ color: "#10b981", fontSize: "1.4rem" }}>
-              {prediction.prediction}
-            </h2>
-          </div>
+        {analysisResult && (
+          <div style={{ marginTop: "20px" }}>
+            <div className="stats-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
+              <div className="stat-card" style={{ borderColor: "#10b981", background: "rgba(16, 185, 129, 0.08)" }}>
+                <p className="stat-label">Predicted Type</p>
+                <h2 className="stat-value" style={{ color: "#10b981", fontSize: "1.3rem" }}>
+                  {analysisResult.analysis?.commit_type}
+                </h2>
+              </div>
 
-          <div className="stat-card">
-            <p className="stat-label">Model Identifier</p>
-            <h2 className="stat-value" style={{ fontSize: "1rem" }}>{prediction.model_id}</h2>
-          </div>
+              <div className="stat-card">
+                <p className="stat-label">Model Version</p>
+                <h2 className="stat-value" style={{ color: "#38bdf8", fontSize: "1.1rem" }}>
+                  {analysisResult.model_info?.version_id}
+                </h2>
+              </div>
 
-          <div className="stat-card">
-            <p className="stat-label">Active Version</p>
-            <h2 className="stat-value" style={{ fontSize: "1.1rem" }}>{prediction.version_id}</h2>
-          </div>
+              <div className="stat-card">
+                <p className="stat-label">Risk Level</p>
+                <h2 className="stat-value" style={{
+                  color: analysisResult.analysis?.risk_level === "HIGH" ? "#ef4444" : analysisResult.analysis?.risk_level === "MEDIUM" ? "#f59e0b" : "#10b981",
+                  fontSize: "1.1rem"
+                }}>
+                  {analysisResult.analysis?.risk_level}
+                </h2>
+              </div>
 
-          <div className="stat-card">
-            <p className="stat-label">Classifier Engine</p>
-            <h2 className="stat-value" style={{ fontSize: "0.85rem" }}>{prediction.algorithm}</h2>
-          </div>
-        </div>
-      )}
-
-      {/* LINEAGE VERIFICATION CARD */}
-      <div className="page-card" style={{ marginTop: "24px", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
-        <h3 style={{ fontSize: "1.1rem", marginBottom: "14px" }}>🔗 Blockchain & Local Lineage Status</h3>
-
-        {lineageLoading ? (
-          <p style={{ color: "#9ca3af" }}>Verifying local hashes & on-chain provenance...</p>
-        ) : lineage ? (
-          <div className="info-grid" style={{ gridTemplateColumns: "1fr 1fr 1fr 1fr" }}>
-            <div className="info-box">
-              <p className="info-label">Local Integrity</p>
-              <div className="info-value" style={{ color: "#10b981", fontWeight: "bold" }}>
-                {lineage.local_lineage?.local_integrity_status || "VERIFIED"}
+              <div className="stat-card">
+                <p className="stat-label">Confidence</p>
+                <h2 className="stat-value" style={{ fontSize: "1.1rem" }}>
+                  {analysisResult.analysis?.confidence}%
+                </h2>
               </div>
             </div>
 
-            <div className="info-box">
-              <p className="info-label">Dataset SHA-256</p>
-              <div className="info-value" style={{ fontSize: "0.75rem", fontFamily: "monospace" }}>
-                {lineage.local_lineage?.dataset_hash?.slice(0, 16)}...
-              </div>
-            </div>
-
-            <div className="info-box">
-              <p className="info-label">Blockchain Provenance</p>
-              <div className="info-value" style={{ color: "#3b82f6", fontWeight: "bold" }}>
-                REGISTERED (Remix VM)
-              </div>
-            </div>
-
-            <div className="info-box">
-              <p className="info-label">Hash Reconciliation</p>
-              <div className="info-value" style={{ color: "#10b981", fontWeight: "bold" }}>
-                VERIFIED (Match)
-              </div>
+            <div style={{ marginTop: "16px", padding: "14px", backgroundColor: "#0f172a", borderRadius: "6px", border: "1px solid #334155", fontSize: "0.85rem", color: "#cbd5e1" }}>
+              <div><strong>Repository:</strong> {analysisResult.repository} | <strong>Author:</strong> {analysisResult.author}</div>
+              <div style={{ marginTop: "4px" }}><strong>Commit Message:</strong> <em>{analysisResult.commit_message}</em></div>
+              <div style={{ marginTop: "4px" }}><strong>Stats:</strong> {analysisResult.stats?.files_changed} files changed, +{analysisResult.stats?.lines_added} / -{analysisResult.stats?.lines_deleted} lines</div>
             </div>
           </div>
-        ) : (
-          <p style={{ color: "#ef4444" }}>Lineage status unavailable.</p>
         )}
+      </div>
+
+      {/* PROVENANCE SUBSECTIONS GRID (LOCAL & BLOCKCHAIN) */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+        
+        {/* LEFT CARD: LOCAL PROVENANCE */}
+        <div style={{
+          padding: "20px",
+          borderRadius: "8px",
+          backgroundColor: "rgba(15, 23, 42, 0.8)",
+          border: "1px solid var(--border-color, #334155)"
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+            <h4 style={{ margin: 0, fontSize: "15px", color: "#f8fafc" }}>LOCAL PROVENANCE</h4>
+            <span style={{
+              padding: "4px 10px",
+              borderRadius: "12px",
+              fontSize: "11px",
+              fontWeight: "600",
+              backgroundColor: provStatus === "VERIFIED" ? "#10b981" : provStatus === "REGISTERED" ? "#3b82f6" : "#64748b",
+              color: "#ffffff"
+            }}>
+              {provStatus === "VERIFIED" ? "VERIFIED" : provStatus === "REGISTERED" ? "REGISTERED" : "NOT REGISTERED"}
+            </span>
+          </div>
+
+          <div style={{ fontSize: "12px", color: "#cbd5e1", display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" }}>
+            <div><strong style={{ color: "#94a3b8" }}>Model:</strong> git-commit-intelligence</div>
+            <div><strong style={{ color: "#94a3b8" }}>Version:</strong> {selectedVersion}</div>
+            <div><strong style={{ color: "#94a3b8" }}>Dataset Hash:</strong> <code style={{ fontSize: "10px" }}>{datasetHashDisplay.slice(0, 16)}...</code></div>
+            <div><strong style={{ color: "#94a3b8" }}>Model Hash:</strong> <code style={{ fontSize: "10px" }}>{modelHashDisplay.slice(0, 16)}...</code></div>
+          </div>
+
+          {provMessage && <p style={{ fontSize: "11px", color: "#38bdf8", marginBottom: "10px" }}>{provMessage}</p>}
+          {provError && <p style={{ fontSize: "11px", color: "#f87171", marginBottom: "10px" }}>{provError}</p>}
+
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              type="button"
+              onClick={handleRegisterLocalProvenance}
+              disabled={provLoading}
+              className="section-button"
+              style={{ padding: "8px 14px", fontSize: "12px" }}
+            >
+              {provLoading ? "Processing..." : "Register Local"}
+            </button>
+            <button
+              type="button"
+              onClick={handleVerifyLocalProvenance}
+              disabled={provLoading}
+              className="section-button"
+              style={{ padding: "8px 14px", fontSize: "12px" }}
+            >
+              {provLoading ? "Processing..." : "Verify Local"}
+            </button>
+          </div>
+        </div>
+
+        {/* RIGHT CARD: BLOCKCHAIN PROVENANCE */}
+        <div style={{
+          padding: "20px",
+          borderRadius: "8px",
+          backgroundColor: "rgba(15, 23, 42, 0.8)",
+          border: "1px solid #0284c7"
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+            <h4 style={{ margin: 0, fontSize: "15px", color: "#38bdf8" }}>BLOCKCHAIN PROVENANCE</h4>
+            <span style={{
+              padding: "4px 10px",
+              borderRadius: "12px",
+              fontSize: "11px",
+              fontWeight: "600",
+              backgroundColor: bcStatus === "VERIFIED" ? "#10b981" : bcStatus === "REGISTERED" ? "#3b82f6" : "#64748b",
+              color: "#ffffff"
+            }}>
+              {bcStatus}
+            </span>
+          </div>
+
+          <div style={{ fontSize: "12px", color: "#cbd5e1", display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" }}>
+            <div><strong style={{ color: "#94a3b8" }}>Model:</strong> git-commit-intelligence</div>
+            <div><strong style={{ color: "#94a3b8" }}>Version:</strong> {selectedVersion}</div>
+            <div><strong style={{ color: "#94a3b8" }}>Dataset Hash:</strong> <code style={{ fontSize: "10px" }}>{datasetHashDisplay}</code></div>
+            <div><strong style={{ color: "#94a3b8" }}>Model Hash:</strong> <code style={{ fontSize: "10px" }}>{modelHashDisplay}</code></div>
+            {bcDetails?.transaction_hash && (
+              <div><strong style={{ color: "#94a3b8" }}>Tx Hash:</strong> <code style={{ fontSize: "10px", color: "#38bdf8" }}>{bcDetails.transaction_hash.slice(0, 18)}...</code></div>
+            )}
+            {bcDetails?.contract_address && (
+              <div><strong style={{ color: "#94a3b8" }}>Contract:</strong> <code style={{ fontSize: "10px" }}>{bcDetails.contract_address}</code></div>
+            )}
+          </div>
+
+          {bcMessage && <p style={{ fontSize: "11px", color: "#38bdf8", marginBottom: "10px" }}>{bcMessage}</p>}
+          {bcError && <p style={{ fontSize: "11px", color: "#f87171", marginBottom: "10px" }}>{bcError}</p>}
+
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              type="button"
+              onClick={handleRegisterBlockchainProvenance}
+              disabled={bcLoading}
+              className="primary-button"
+              style={{ padding: "8px 14px", fontSize: "12px", backgroundColor: "#0284c7" }}
+            >
+              {bcLoading ? "Executing Tx..." : "Register On Blockchain"}
+            </button>
+            <button
+              type="button"
+              onClick={handleVerifyBlockchainProvenance}
+              disabled={bcLoading}
+              className="primary-button"
+              style={{ padding: "8px 14px", fontSize: "12px", backgroundColor: "#059669" }}
+            >
+              {bcLoading ? "Verifying..." : "Verify On Blockchain"}
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   );
